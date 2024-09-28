@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.google.service) apply false
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -34,6 +34,11 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    buildFeatures {
+        //noinspection DataBindingWithoutKapt
+        dataBinding = true
+    }
 }
 
 dependencies {
@@ -52,12 +57,13 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-analytics")
 
-
     // Firestore
     implementation("com.google.firebase:firebase-firestore")
 
     // Authentication
-    implementation("com.google.firebase:firebase-auth")
+    implementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
 
 
     // Storage
@@ -66,4 +72,5 @@ dependencies {
     // GLide
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+
 }

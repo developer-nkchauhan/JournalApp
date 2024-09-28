@@ -12,7 +12,12 @@
           "package_name": "com.develop.journalapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "752132782847-gt9vk73gqoj411edf3ng24d2mn56i943.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDibl70_XhHdAbchQCS4cTBZ42K4khZ-qU"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "752132782847-gt9vk73gqoj411edf3ng24d2mn56i943.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

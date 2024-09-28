@@ -7,33 +7,40 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.develop.journalapp.LoginFragment"
+        android:name="com.develop.journalapp.ui.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
             android:id="@+id/action_loginFragment_to_signUpFragment"
             app:destination="@id/signUpFragment" />
         <action
-            android:id="@+id/action_loginFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
+            android:id="@+id/action_loginFragment_to_journalListFragment"
+            app:destination="@id/journalListFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
     <fragment
         android:id="@+id/signUpFragment"
-        android:name="com.develop.journalapp.SignUpFragment"
+        android:name="com.develop.journalapp.ui.SignUpFragment"
         android:label="fragment_sign_up"
-        tools:layout="@layout/fragment_sign_up" >
+        tools:layout="@layout/fragment_sign_up"
+        >
         <action
             android:id="@+id/action_signUpFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/signUpFragment" />
     </fragment>
     <fragment
-        android:id="@+id/mainFragment"
-        android:name="com.develop.journalapp.JournalListFragment"
+        android:id="@+id/journalListFragment"
+        android:name="com.develop.journalapp.ui.JournalListFragment"
         android:label="fragment_main"
-        tools:layout="@layout/fragment_journal_list" >
+        tools:layout="@layout/fragment_journal_list">
         <action
-            android:id="@+id/action_mainFragment_to_addJournalFragment"
+            android:id="@+id/action_journalListFragment_to_addJournalFragment"
             app:destination="@id/addJournalFragment" />
+        <action
+            android:id="@+id/action_journalListFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/addJournalFragment"
@@ -41,8 +48,10 @@
         android:label="fragment_add_journal"
         tools:layout="@layout/fragment_add_journal" >
         <action
-            android:id="@+id/action_addJournalFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
+            android:id="@+id/action_addJournalFragment_to_journalListFragment"
+            app:destination="@id/journalListFragment"
+            app:popUpTo="@id/addJournalFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
 
 </navigation>
