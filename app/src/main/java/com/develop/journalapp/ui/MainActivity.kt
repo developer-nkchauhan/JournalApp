@@ -1,15 +1,18 @@
-package com.develop.journalapp
+package com.develop.journalapp.ui
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.databinding.DataBindingUtil
+import com.develop.journalapp.R
+import com.develop.journalapp.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var mainBind : ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        mainBind = DataBindingUtil.setContentView(this, R.layout.activity_main)
     }
+
+
 }
