@@ -1,5 +1,6 @@
 package com.develop.journalapp.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -7,26 +8,35 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.develop.journalapp.R
+import com.develop.journalapp.adapter.JournalAdapter
 import com.develop.journalapp.databinding.FragmentJournalListBinding
+import com.develop.journalapp.model.Constant
+import com.develop.journalapp.model.Journal
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
 
 class JournalListFragment : Fragment(),MenuProvider {
 
     private lateinit var jListBind : FragmentJournalListBinding
     private var fbAuth : FirebaseAuth? = null
+    private var journalList = mutableListOf<Journal>()
 
     private lateinit var navOptions : NavOptions
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private lateinit var fbFireStore : FirebaseFirestore
+    private lateinit var collectionReference: CollectionReference
+
+    private var adapter : JournalAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,13 +52,37 @@ class JournalListFragment : Fragment(),MenuProvider {
         (activity as AppCompatActivity).setSupportActionBar(jListBind.toolbar)
 
         fbAuth = FirebaseAuth.getInstance()
+        fbFireStore = FirebaseFirestore.getInstance()
+        collectionReference = fbFireStore.collection(Constant.COLLECTION_REFER)
+
         navOptions = NavOptions.Builder().setPopUpTo(R.id.journalListFragment,true).build()
         requireActivity().addMenuProvider(this,viewLifecycleOwner)
         jListBind.lifecycleOwner = viewLifecycleOwner
 
+//        jListBind.recyclerView.adapter = adapter
+        jListBind.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        retrieveDataAndDisplay()
         super.onViewCreated(view, savedInstanceState)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    private fun retrieveDataAndDisplay() {
+        collectionReference.get().addOnSuccessListener { querySnapshots ->
+            for(doc in querySnapshots) {
+                val journal = doc.toObject(Journal::class.java)
+                if(journal.userId == fbAuth?.currentUser?.uid){
+                    journalList.add(journal)
+                }
+            }
+            adapter = JournalAdapter(jListBind.root.context,journalList)
+            jListBind.recyclerView.adapter = adapter
+            adapter?.notifyDataSetChanged()
+        }
+        .addOnFailureListener {
+            Toast.makeText(jListBind.root.context, "Failed to set data in recyclerview", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.my_menu,menu)
@@ -57,6 +91,7 @@ class JournalListFragment : Fragment(),MenuProvider {
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         return when(menuItem.itemId) {
             R.id.action_add -> {
+                findNavController().navigate(R.id.action_journalListFragment_to_addJournalFragment)
                 true
             }
             R.id.action_signout -> {
@@ -69,6 +104,4 @@ class JournalListFragment : Fragment(),MenuProvider {
             else -> false
         }
     }
-
-
 }

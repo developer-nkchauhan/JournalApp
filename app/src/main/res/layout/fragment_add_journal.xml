@@ -10,6 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="20dp"
         android:background="@drawable/gradient_add_journal"
         tools:context=".AddJournalFragment">
 
@@ -102,6 +103,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="28dp"
             android:layout_marginEnd="8dp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/post_description_et" />
