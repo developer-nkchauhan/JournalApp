@@ -1,6 +1,5 @@
 package com.develop.journalapp.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -9,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.databinding.DataBindingUtil
@@ -29,6 +29,10 @@ class JournalListFragment : Fragment(),MenuProvider {
 
     private lateinit var jListBind : FragmentJournalListBinding
     private var fbAuth : FirebaseAuth? = null
+    /**
+     *  Maintaining it to compare that Firebase data changed or not
+     *  If changed then refresh adapter by adding only new item not all recyclerview data.
+     */
     private var journalList = mutableListOf<Journal>()
 
     private lateinit var navOptions : NavOptions
@@ -47,42 +51,66 @@ class JournalListFragment : Fragment(),MenuProvider {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        try {
 
-        // Set up the toolbar as an ActionBar
-        (activity as AppCompatActivity).setSupportActionBar(jListBind.toolbar)
+            // Set up the toolbar as an ActionBar
+            (activity as AppCompatActivity).setSupportActionBar(jListBind.toolbar)
 
-        fbAuth = FirebaseAuth.getInstance()
-        fbFireStore = FirebaseFirestore.getInstance()
-        collectionReference = fbFireStore.collection(Constant.COLLECTION_REFER)
+            fbAuth = FirebaseAuth.getInstance()
+            fbFireStore = FirebaseFirestore.getInstance()
+            collectionReference = fbFireStore.collection(Constant.COLLECTION_REFER)
 
-        navOptions = NavOptions.Builder().setPopUpTo(R.id.journalListFragment,true).build()
-        requireActivity().addMenuProvider(this,viewLifecycleOwner)
-        jListBind.lifecycleOwner = viewLifecycleOwner
+            collectionReference.addSnapshotListener { value, error ->
+                if(error != null){
+                    Toast.makeText(this.requireContext(), error.message, Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
 
-//        jListBind.recyclerView.adapter = adapter
-        jListBind.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        retrieveDataAndDisplay()
-        super.onViewCreated(view, savedInstanceState)
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun retrieveDataAndDisplay() {
-        collectionReference.get().addOnSuccessListener { querySnapshots ->
-            for(doc in querySnapshots) {
-                val journal = doc.toObject(Journal::class.java)
-                if(journal.userId == fbAuth?.currentUser?.uid){
-                    journalList.add(journal)
+                if(value?.isEmpty == false){
+                    if(journalList.size < value.size()){
+                        for(data in value.documents){
+                            val journal = data.toObject(Journal::class.java)
+                            if(!journalList.contains(journal)){
+                                journalList.add(journal!!)
+                                adapter?.addData(journal)
+                            }
+                        }
+                    }else{
+                        adapter?.updateRecyclerView(journalList)
+                    }
                 }
             }
-            adapter = JournalAdapter(jListBind.root.context,journalList)
+//            adapter?.updateRecyclerView(journalList)
+
+            navOptions = NavOptions.Builder().setPopUpTo(R.id.journalListFragment,true).build()
+            requireActivity().addMenuProvider(this,viewLifecycleOwner)
+            jListBind.lifecycleOwner = viewLifecycleOwner
+
+    //        jListBind.recyclerView.adapter = adapter
+            adapter = JournalAdapter(jListBind.root.context)
             jListBind.recyclerView.adapter = adapter
-            adapter?.notifyDataSetChanged()
-        }
-        .addOnFailureListener {
-            Toast.makeText(jListBind.root.context, "Failed to set data in recyclerview", Toast.LENGTH_SHORT).show()
+            jListBind.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+//            retrieveDataAndDisplay()
+        }catch (e : Exception){
+            e.printStackTrace()
         }
     }
+
+//    private fun retrieveDataAndDisplay() {
+//        collectionReference.get().addOnSuccessListener { querySnapshots ->
+//            for(doc in querySnapshots) {
+//                val journal = doc.toObject(Journal::class.java)
+//                if(journal.userId == fbAuth?.currentUser?.uid){
+////                    journalList.add(journal)
+//                    adapter?.addData(journal)
+//                }
+//            }
+//        }
+//        .addOnFailureListener {
+//            Toast.makeText(jListBind.root.context, "Failed to set data in recyclerview", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.my_menu,menu)
@@ -95,10 +123,23 @@ class JournalListFragment : Fragment(),MenuProvider {
                 true
             }
             R.id.action_signout -> {
-                fbAuth?.signOut()
-                if(fbAuth?.currentUser == null){
-                    findNavController().navigate(R.id.action_journalListFragment_to_loginFragment,null,navOptions)
-                }
+                AlertDialog.Builder(this.requireContext())
+                    .setTitle("Log Out")
+                    .setMessage("Are you sure you want to Logout ?")
+                    .setCancelable(false)
+                    .setPositiveButton("Logout"){ dialog,_ ->
+                        fbAuth?.signOut()
+                        if(fbAuth?.currentUser == null){
+                            findNavController().navigate(R.id.action_journalListFragment_to_loginFragment,null,navOptions)
+                        }
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("Cancel"){ dialog,_ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+//                fbAuth?.signOut()
+
                 true
             }
             else -> false
