@@ -32,9 +32,9 @@
     </fragment>
     <fragment
         android:id="@+id/journalListFragment"
-        android:name="com.develop.journalapp.ui.JournalListFragment"
+        android:name="com.develop.journalapp.ui.HomeFragment"
         android:label="fragment_main"
-        tools:layout="@layout/fragment_journal_list">
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_journalListFragment_to_addJournalFragment"
             app:destination="@id/addJournalFragment" />

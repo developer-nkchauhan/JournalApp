@@ -3,7 +3,9 @@ package com.develop.journalapp
 import android.app.Application
 import android.widget.Toast
 import com.google.firebase.FirebaseApp
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class JournalApp : Application() {
 
     private var fbApp : FirebaseApp? = null

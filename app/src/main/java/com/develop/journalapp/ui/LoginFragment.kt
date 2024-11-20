@@ -13,12 +13,15 @@ import com.develop.journalapp.R
 import com.develop.journalapp.databinding.FragmentLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
 
     private lateinit var loginBind : FragmentLoginBinding
 
-    private var fbAuth : FirebaseAuth? = null
+    @Inject lateinit var fbAuth : FirebaseAuth
     private lateinit var fbAuthListener : FirebaseAuth.AuthStateListener
     private var currentUser : FirebaseUser? = null
 
@@ -29,7 +32,6 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         loginBind = DataBindingUtil.inflate(inflater, R.layout.fragment_login,container,false)
-        fbAuth = FirebaseAuth.getInstance()
         return loginBind.root
     }
 
@@ -41,7 +43,7 @@ class LoginFragment : Fragment() {
 //        fbAuthListener = FirebaseAuth.AuthStateListener { it ->
 //            currentUser = fbAuth?.currentUser
 //        }
-        if(fbAuth?.currentUser != null) {
+        if(fbAuth.currentUser != null) {
             findNavController().navigate(R.id.action_loginFragment_to_journalListFragment,null,navOptions)
         }
 
@@ -60,13 +62,13 @@ class LoginFragment : Fragment() {
     }
 
     private fun doLogin(email: String, password: String) {
-        fbAuth?.signInWithEmailAndPassword(email,password)
-            ?.addOnCompleteListener { task ->
+        fbAuth.signInWithEmailAndPassword(email,password)
+            .addOnCompleteListener { task ->
                 if(task.isSuccessful){
                     findNavController().navigate(R.id.action_loginFragment_to_journalListFragment,null,navOptions)
                 }
             }
-            ?.addOnFailureListener {
+            .addOnFailureListener {
                 Toast.makeText(loginBind.root.context, "${it.message}", Toast.LENGTH_SHORT).show()
             }
     }

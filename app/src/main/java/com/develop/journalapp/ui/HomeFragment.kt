@@ -16,19 +16,22 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.develop.journalapp.IProgressIndicator
 import com.develop.journalapp.R
 import com.develop.journalapp.adapter.JournalAdapter
-import com.develop.journalapp.databinding.FragmentJournalListBinding
-import com.develop.journalapp.model.Constant
+import com.develop.journalapp.databinding.FragmentHomeBinding
 import com.develop.journalapp.model.Journal
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-class JournalListFragment : Fragment(),MenuProvider {
+@AndroidEntryPoint
+class HomeFragment : Fragment(),MenuProvider {
 
-    private lateinit var jListBind : FragmentJournalListBinding
-    private var fbAuth : FirebaseAuth? = null
+    private lateinit var jListBind : FragmentHomeBinding
+    @Inject lateinit var fbAuth : FirebaseAuth
     /**
      *  Maintaining it to compare that Firebase data changed or not
      *  If changed then refresh adapter by adding only new item not all recyclerview data.
@@ -38,15 +41,17 @@ class JournalListFragment : Fragment(),MenuProvider {
     private lateinit var navOptions : NavOptions
 
     private lateinit var fbFireStore : FirebaseFirestore
-    private lateinit var collectionReference: CollectionReference
+    @Inject lateinit var collectionReference: CollectionReference
 
     private var adapter : JournalAdapter? = null
+
+    private lateinit var progressBar : IProgressIndicator
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        jListBind = DataBindingUtil.inflate(inflater, R.layout.fragment_journal_list,container,false)
+        jListBind = DataBindingUtil.inflate(inflater, R.layout.fragment_home,container,false)
         return jListBind.root
     }
 
@@ -55,13 +60,20 @@ class JournalListFragment : Fragment(),MenuProvider {
 
             // Set up the toolbar as an ActionBar
             (activity as AppCompatActivity).setSupportActionBar(jListBind.toolbar)
-
-            fbAuth = FirebaseAuth.getInstance()
             fbFireStore = FirebaseFirestore.getInstance()
-            collectionReference = fbFireStore.collection(Constant.COLLECTION_REFER)
+
+            if(requireActivity() is IProgressIndicator){
+                progressBar = requireActivity() as IProgressIndicator
+            }
+//            customProBarBind = CustomProgressBarBinding.inflate(LayoutInflater.from(requireContext()),null,false)
+//            dialog = AlertDialog.Builder(requireContext()).setView(customProBarBind.root).setCancelable(false).setTitle("Please Wait!").create()
+
+
+            progressBar.showProgressBar("Data is being loading...")
 
             collectionReference.addSnapshotListener { value, error ->
                 if(error != null){
+                    progressBar.dismissProgressBar()
                     Toast.makeText(this.requireContext(), error.message, Toast.LENGTH_SHORT).show()
                     return@addSnapshotListener
                 }
@@ -79,6 +91,7 @@ class JournalListFragment : Fragment(),MenuProvider {
                         adapter?.updateRecyclerView(journalList)
                     }
                 }
+                progressBar.dismissProgressBar()
             }
 //            adapter?.updateRecyclerView(journalList)
 
@@ -128,8 +141,8 @@ class JournalListFragment : Fragment(),MenuProvider {
                     .setMessage("Are you sure you want to Logout ?")
                     .setCancelable(false)
                     .setPositiveButton("Logout"){ dialog,_ ->
-                        fbAuth?.signOut()
-                        if(fbAuth?.currentUser == null){
+                        fbAuth.signOut()
+                        if(fbAuth.currentUser == null){
                             findNavController().navigate(R.id.action_journalListFragment_to_loginFragment,null,navOptions)
                         }
                         dialog.dismiss()
