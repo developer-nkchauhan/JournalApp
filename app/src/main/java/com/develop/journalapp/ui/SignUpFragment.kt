@@ -13,12 +13,15 @@ import com.develop.journalapp.databinding.FragmentSignUpBinding
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 
+@AndroidEntryPoint
 class SignUpFragment : Fragment() {
 
     private lateinit var signUpBinding : FragmentSignUpBinding
-    private var fbAuth : FirebaseAuth? = null
+    @Inject lateinit var fbAuth : FirebaseAuth
 
 
 
@@ -33,14 +36,14 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fbAuth = FirebaseAuth.getInstance()
+//        fbAuth = FirebaseAuth.getInstance()
 
         signUpBinding.accSignUpBtn.setOnClickListener {
             val email = signUpBinding.emailCreate.text.trim().toString()
             val password = signUpBinding.passwordCreate.text.trim().toString()
             val username = signUpBinding.usernameCreateET.text.trim().toString()
 
-            if(email.isNotEmpty() && password.isNotEmpty() && username.isNotEmpty()){
+            if(email.isNotEmpty() && password.isNotEmpty() && username.isNotEmpty()) {
                 signUpUser(email,password,username)
             }
 
@@ -48,14 +51,14 @@ class SignUpFragment : Fragment() {
     }
 
     private fun signUpUser(email: String, password: String, username: String) {
-            fbAuth?.createUserWithEmailAndPassword(email,password)
-                ?.addOnCompleteListener { task : Task<AuthResult> ->
+            fbAuth.createUserWithEmailAndPassword(email,password)
+                .addOnCompleteListener { task : Task<AuthResult> ->
                     if(task.isSuccessful){
                         Toast.makeText(signUpBinding.root.context, "Registered Successfully", Toast.LENGTH_SHORT).show()
                         findNavController().navigate(R.id.action_signUpFragment_to_loginFragment)
                     }
                 }
-                ?.addOnFailureListener { exception ->
+                .addOnFailureListener { exception ->
                     Toast.makeText(signUpBinding.root.context, "${exception.message}", Toast.LENGTH_SHORT).show()
                 }
     }

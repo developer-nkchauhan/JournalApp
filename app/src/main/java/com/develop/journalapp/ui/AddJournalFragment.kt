@@ -20,8 +20,11 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AddJournalFragment : Fragment() {
 
     private lateinit var addJournalBinding: FragmentAddJournalBinding
@@ -32,8 +35,8 @@ class AddJournalFragment : Fragment() {
     private lateinit var fbFireStore : FirebaseFirestore
 
 
-    private lateinit var fbAuth : FirebaseAuth
-    private lateinit var fbCollRef : CollectionReference
+    @Inject lateinit var fbAuth : FirebaseAuth
+    @Inject lateinit var fbCollRef : CollectionReference
     private var user : FirebaseUser? = null
     private var imgUrl : Uri? = null
 
@@ -52,9 +55,7 @@ class AddJournalFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fbAuth = FirebaseAuth.getInstance()
         fbFireStore = FirebaseFirestore.getInstance()
-        fbCollRef = fbFireStore.collection(Constant.COLLECTION_REFER)
 
         fbStorage = FirebaseStorage.getInstance()
         storageReference = fbStorage.reference
